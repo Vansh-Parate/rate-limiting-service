@@ -1,4 +1,6 @@
 import express from "express";
+import { ClientConfig } from "./types";
+import { clients } from "./store";
 
 const app = express();
 
@@ -19,10 +21,26 @@ app.post('/client', (req,res) => {
         })
     }
 
-    res.status(201).json({
-        message: "Client created"
-    })
+    if(clients.has(clientId)){
+        return res.status(409).json({
+            message: "Client already exits"
+        })
+    }
+
+    const client: ClientConfig = {
+        clientId,
+        capacity,
+        refillRate
+    };
+
+    clients.set(clientId, client)
+
+    res.status(201).json(client);
 })
+
+app.get("/clients", (req, res) => {
+    res.json(Array.from(clients.values()));
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
