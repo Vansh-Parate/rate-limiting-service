@@ -1,6 +1,6 @@
 import express from "express";
 import { ClientConfig } from "./types";
-import { clients } from "./store";
+import { buckets, clients } from "./store";
 
 const app = express();
 
@@ -33,13 +33,32 @@ app.post('/client', (req,res) => {
         refillRate
     };
 
-    clients.set(clientId, client)
+    clients.set(clientId, client);
+
+    buckets.set(clientId,{
+        tokens: capacity,
+        lastRefill: Date.now()
+    })
 
     res.status(201).json(client);
 })
 
 app.get("/clients", (req, res) => {
     res.json(Array.from(clients.values()));
+});
+
+app.post("/check", (req, res) => {
+    const {clientId} = req.body;
+
+    if(!clients.has(clientId)){
+        return res.status(409).json({
+            message: "Client not found"
+        })
+    }else{
+        res.json({
+            allowed: true
+        })
+    }
 });
 
 const PORT = 3000;

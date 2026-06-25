@@ -3,3 +3,8 @@ export interface ClientConfig {
     capacity: number;
     refillRate: number;
   }
+
+export interface Bucket {
+    tokens: number;
+    lastRefill: number;
+}  
