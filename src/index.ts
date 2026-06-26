@@ -4,6 +4,7 @@ import { allowRequest } from "./tokenBucket";
 import { redis } from "./redis";
 import { getBucket, saveBucket } from "./bucketRepository";
 import { getClient, saveClient } from "./clientRepository";
+import { checkRateLimit } from "./services/checkRate";
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.post('/client', async(req,res) => {
 
     const {clientId, capacity, refillRate } = req.body;
 
-    if(!clientId || !capacity || !refillRate){
+    if(!clientId || !capacity){
         return res.status(400).json({
             message: "Missing required fields"
         })
@@ -65,32 +66,20 @@ app.get("/bucket/:clientId",async(req,res)=>{
 })
 
 app.post("/check", async(req, res) => {
-    const {clientId} = req.body;
+    const result = await checkRateLimit(req.body.clientId);
 
-    const config = await getClient(clientId);
-
-    if(!config){
-        return res.status(409).json({
-            message: "Client not found"
-        })
-    }
-    
-    const bucket = await getBucket(clientId);
-
-    if(!bucket){
-        return res.status(500).json({
-            message: "Bucket not found"
-        });
-    }
-
-    const allowed = allowRequest(bucket, config);
-
-    await saveBucket(clientId, bucket);
-    console.log(bucket.tokens);
-    
+    res.setHeader(
+            "X-RateLimit-Limit",
+            result.capacity
+    )
+    res.setHeader(
+            "X-RateLimit-Remaining",
+            result.tokensRemaining
+    )
     res.json({
-        allowed
-    })   
+            allowed: result.allowed,
+            tokensRemaining: result.tokensRemaining
+    });
 });
 
 const PORT = 3000;
