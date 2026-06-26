@@ -1,9 +1,9 @@
 import express from "express";
 import { ClientConfig } from "./types";
-import { clients } from "./store";
 import { allowRequest } from "./tokenBucket";
 import { redis } from "./redis";
 import { getBucket, saveBucket } from "./bucketRepository";
+import { getClient, saveClient } from "./clientRepository";
 
 const app = express();
 
@@ -24,19 +24,13 @@ app.post('/client', async(req,res) => {
         })
     }
 
-    if(clients.has(clientId)){
-        return res.status(409).json({
-            message: "Client already exits"
-        })
-    }
-
     const client: ClientConfig = {
         clientId,
         capacity,
         refillRate
     };
 
-    clients.set(clientId, client);
+    await saveClient(client);
 
     await saveBucket(clientId,{
         tokens: capacity,
@@ -46,14 +40,34 @@ app.post('/client', async(req,res) => {
     res.status(201).json(client);
 })
 
-app.get("/clients", (req, res) => {
-    res.json(Array.from(clients.values()));
-});
+app.get("/client/:clientId",async(req,res)=>{
+    const client = await getClient(req.params.clientId);
+
+    if(!client){
+        return res.status(404).json({
+            message: "Not found"
+        })
+    }
+
+    res.json(client);
+})
+
+app.get("/bucket/:clientId",async(req,res)=>{
+    const bucket = await getBucket(req.params.clientId);
+
+    if(!bucket){
+        return res.status(404).json({
+            message: "Not found"
+        })
+    }
+
+    res.json(bucket);
+})
 
 app.post("/check", async(req, res) => {
     const {clientId} = req.body;
 
-    const config = clients.get(clientId)
+    const config = await getClient(clientId);
 
     if(!config){
         return res.status(409).json({
@@ -78,17 +92,6 @@ app.post("/check", async(req, res) => {
         allowed
     })   
 });
-
-app.get("/redis-bucket",async(req,res)=>{
-    await saveBucket("demo",{
-        tokens:10,
-        lastRefill: Date.now()
-    })
-
-    const bucket = await getBucket("demo");
-
-    res.json(bucket);
-})
 
 const PORT = 3000;
 
