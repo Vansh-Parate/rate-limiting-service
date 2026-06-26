@@ -1,6 +1,9 @@
 import express from "express";
 import { ClientConfig } from "./types";
-import { buckets, clients } from "./store";
+import { clients } from "./store";
+import { allowRequest } from "./tokenBucket";
+import { redis } from "./redis";
+import { getBucket, saveBucket } from "./bucketRepository";
 
 const app = express();
 
@@ -10,7 +13,7 @@ app.get('/', (req,res) => {
     res.send("Rate limiter service running");
 })
 
-app.post('/client', (req,res) => {
+app.post('/client', async(req,res) => {
     console.log(req.body);
 
     const {clientId, capacity, refillRate } = req.body;
@@ -35,7 +38,7 @@ app.post('/client', (req,res) => {
 
     clients.set(clientId, client);
 
-    buckets.set(clientId,{
+    await saveBucket(clientId,{
         tokens: capacity,
         lastRefill: Date.now()
     })
@@ -47,21 +50,55 @@ app.get("/clients", (req, res) => {
     res.json(Array.from(clients.values()));
 });
 
-app.post("/check", (req, res) => {
+app.post("/check", async(req, res) => {
     const {clientId} = req.body;
 
-    if(!clients.has(clientId)){
+    const config = clients.get(clientId)
+
+    if(!config){
         return res.status(409).json({
             message: "Client not found"
         })
-    }else{
-        res.json({
-            allowed: true
-        })
     }
+    
+    const bucket = await getBucket(clientId);
+
+    if(!bucket){
+        return res.status(500).json({
+            message: "Bucket not found"
+        });
+    }
+
+    const allowed = allowRequest(bucket, config);
+
+    await saveBucket(clientId, bucket);
+    console.log(bucket.tokens);
+    
+    res.json({
+        allowed
+    })   
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`)
+app.get("/redis-bucket",async(req,res)=>{
+    await saveBucket("demo",{
+        tokens:10,
+        lastRefill: Date.now()
+    })
+
+    const bucket = await getBucket("demo");
+
+    res.json(bucket);
 })
+
+const PORT = 3000;
+
+async function start(){
+    await redis.connect();
+    console.log("Redis connected");
+
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`)
+    })
+}
+
+start();

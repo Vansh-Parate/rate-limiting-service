@@ -14,5 +14,11 @@ export function allowRequest(
     )
 
     bucket.lastRefill = now;
+
+    if(bucket.tokens<1){
+        return false;
+    }
+
+    bucket.tokens -= 1
     return true;
 }
