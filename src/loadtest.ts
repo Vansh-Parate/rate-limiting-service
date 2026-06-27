@@ -2,8 +2,8 @@ import http from "k6/http";
 import {Counter} from "k6/metrics"
 
 export const options = {
-    vus: 100,
-    iterations: 100,
+    vus: 10,
+    iterations: 10,
 };
 
 const allowedCounter = new Counter("allowed_requests");
@@ -13,7 +13,7 @@ export default function () {
     const res = http.post(
         "http://localhost:3000/check",
         JSON.stringify({
-            clientId: "load-test-1",
+            clientId: "load-test-3",
         }),
         {
             headers: {
@@ -28,4 +28,6 @@ export default function () {
     } else {
         deniedCounter.add(1);
     }
+
+    console.log(res.body);
 }
