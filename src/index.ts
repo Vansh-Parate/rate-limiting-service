@@ -1,6 +1,5 @@
 import express from "express";
 import { ClientConfig } from "./types";
-import { allowRequest } from "./tokenBucket";
 import { redis } from "./redis";
 import { getBucket, saveBucket } from "./bucketRepository";
 import { getClient, saveClient } from "./clientRepository";
@@ -88,31 +87,6 @@ const script = fs.readFileSync(
     "./src/lua/tokenBucket.lua",
     "utf8"
 );
-
-app.get("/lua/:clientId", async (req, res) => {
-
-    const clientId = req.params.clientId;
-
-    const config = await getClient(clientId);
-
-    if (!config) {
-        return res.status(404).json({
-            message: "Client not found"
-        });
-    }
-
-    const result = await redis.eval(script, {
-        keys: [`bucket:${clientId}`],
-        arguments: [
-            config.capacity.toString(),
-            config.refillRate.toString(),
-            Date.now().toString()
-        ]
-    });
-
-    const response = JSON.parse(result as string);
-    res.json(response);
-});
 
 const PORT = 3000;
 
