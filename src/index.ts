@@ -4,6 +4,7 @@ import { redis } from "./redis";
 import { getBucket, saveBucket } from "./bucketRepository";
 import { getClient, saveClient } from "./clientRepository";
 import { checkRateLimit } from "./services/checkRate";
+import crypto from "crypto"
 
 const app = express();
 
@@ -24,15 +25,19 @@ app.post('/client', async(req,res) => {
         })
     }
 
+    const apiKey =
+    "sk_" + crypto.randomBytes(32).toString("hex");
+
     const client: ClientConfig = {
         clientId,
         capacity,
+        apiKey,
         refillRate
     };
 
     await saveClient(client);
 
-    await saveBucket(clientId,{
+    await saveBucket(apiKey,{
         tokens: capacity,
         lastRefill: Date.now()
     })
@@ -65,7 +70,14 @@ app.get("/bucket/:clientId",async(req,res)=>{
 })
 
 app.post("/check", async(req, res) => {
-    const result = await checkRateLimit(req.body.clientId);
+    const apiKey = req.get("X-API-Key");
+
+    if (!apiKey) {
+        return res.status(400).json({
+            message: "Missing X-API-Key header"
+        });
+    }
+    const result = await checkRateLimit(apiKey);
 
     res.setHeader(
             "X-RateLimit-Limit",

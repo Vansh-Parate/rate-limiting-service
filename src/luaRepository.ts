@@ -7,12 +7,12 @@ const script = fs.readFileSync(
 );
 
 export async function executeTokenBucket(
-    clientId: string,
+    apiKey: string,
     capacity: number,
     refillRate: number
 ) {
     const result = await redis.eval(script, {
-        keys: [`bucket:${clientId}`],
+        keys: [`bucket:${apiKey}`],
         arguments: [
             capacity.toString(),
             refillRate.toString(),

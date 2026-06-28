@@ -3,17 +3,17 @@ import { executeTokenBucket } from "../luaRepository";
 import { RateLimitResult } from "../types";
 
 export async function checkRateLimit(
-    clientId: string
+    apiKey: string
 ): Promise<RateLimitResult> {
 
-    const config = await getClient(clientId);
+    const config = await getClient(apiKey);
 
     if (!config) {
         throw new Error("Client not found");
     }
 
     const result = await executeTokenBucket(
-        clientId,
+        apiKey,
         config.capacity,
         config.refillRate
     );

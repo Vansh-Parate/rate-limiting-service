@@ -2,6 +2,7 @@ export interface ClientConfig {
     clientId: string;
     capacity: number;
     refillRate: number;
+    apiKey: string;
   }
 
 export interface Bucket {

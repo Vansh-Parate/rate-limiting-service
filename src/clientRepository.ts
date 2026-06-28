@@ -5,13 +5,13 @@ export async function saveClient(
     client: ClientConfig
 ){
     await redis.set(
-        `client:${client.clientId}`,
+        `client:${client.apiKey}`,
         JSON.stringify(client)
     )   
 }
 
-export async function getClient(clientId:string): Promise<ClientConfig | null> {
-    const data = await redis.get(`client:${clientId}`);
+export async function getClient(apiKey:string): Promise<ClientConfig | null> {
+    const data = await redis.get(`client:${apiKey}`);
 
     if (!data) return null;
 
