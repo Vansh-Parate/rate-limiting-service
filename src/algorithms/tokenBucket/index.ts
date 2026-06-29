@@ -1,5 +1,5 @@
 import fs from "fs";
-import { redis } from "./redis";
+import { redis } from "../../redis";
 
 const script = fs.readFileSync(
     "./src/lua/tokenBucket.lua",

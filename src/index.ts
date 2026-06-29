@@ -1,9 +1,9 @@
 import express from "express";
 import { ClientConfig } from "./types";
 import { redis } from "./redis";
-import { getBucket, saveBucket } from "./bucketRepository";
-import { getClient, saveClient } from "./clientRepository";
-import { checkRateLimit } from "./services/checkRate";
+import { getBucket, saveBucket } from "./repositories/bucketRepository";
+import { getClient, saveClient } from "./repositories/clientRepository";
+import { checkRateLimit } from "./services/rateLimiterService";
 import crypto from "crypto"
 
 const app = express();
@@ -17,7 +17,7 @@ app.get('/', (req,res) => {
 app.post('/client', async(req,res) => {
     console.log(req.body);
 
-    const {clientId, capacity, refillRate } = req.body;
+    const {clientId, capacity, refillRate,algorithm="token_bucket" } = req.body;
 
     if(!clientId || !capacity){
         return res.status(400).json({
@@ -32,7 +32,8 @@ app.post('/client', async(req,res) => {
         clientId,
         capacity,
         apiKey,
-        refillRate
+        refillRate,
+        algorithm
     };
 
     await saveClient(client);

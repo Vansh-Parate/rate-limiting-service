@@ -1,6 +1,7 @@
-import { getClient } from "../clientRepository";
-import { executeTokenBucket } from "../luaRepository";
+import { getClient } from "../repositories/clientRepository";
+import { executeTokenBucket } from "../algorithms/tokenBucket";
 import { RateLimitResult } from "../types";
+import { executeAlgorithm } from "../algorithms";
 
 export async function checkRateLimit(
     apiKey: string
@@ -12,11 +13,7 @@ export async function checkRateLimit(
         throw new Error("Client not found");
     }
 
-    const result = await executeTokenBucket(
-        apiKey,
-        config.capacity,
-        config.refillRate
-    );
+    const result = await executeAlgorithm(config);
 
     return {
         allowed: result.allowed,

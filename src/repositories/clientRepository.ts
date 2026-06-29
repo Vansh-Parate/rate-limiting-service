@@ -1,5 +1,5 @@
-import { redis } from "./redis";
-import { ClientConfig } from "./types";
+import { redis } from "../redis";
+import { ClientConfig } from "../types";
 
 export async function saveClient(
     client: ClientConfig

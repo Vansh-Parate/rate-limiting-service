@@ -1,5 +1,5 @@
-import { redis } from "./redis";
-import { Bucket } from "./types";
+import { redis } from "../redis";
+import { Bucket } from "../types";
 
 export async function saveBucket(
     apiKey: string,
