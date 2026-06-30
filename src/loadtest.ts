@@ -13,7 +13,7 @@ export default function () {
     const res = http.post(
         "http://localhost:3000/check",
         JSON.stringify({
-            clientId: "load-test-3",
+            clientId: "load-test-4",
         }),
         {
             headers: {

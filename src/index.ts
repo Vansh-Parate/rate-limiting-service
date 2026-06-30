@@ -81,13 +81,6 @@ app.post("/check", async(req, res) => {
     });
 });
 
-import fs from "fs";
-
-const script = fs.readFileSync(
-    "./src/lua/tokenBucket.lua",
-    "utf8"
-);
-
 const PORT = 3000;
 
 async function start(){
