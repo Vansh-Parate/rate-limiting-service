@@ -4,11 +4,20 @@ export type RateLimitAlgo =
 
 export interface ClientConfig {
     clientId: string;
-    capacity: number;
     algorithm: RateLimitAlgo
-    refillRate: number;
     apiKey: string;
+
+    refillRate: number;
+    capacity: number;
+
+    windowSize?: number;
+    maxRequests?: number;
   }
+
+export interface AlgorithmResult {
+    allowed: boolean;
+    remaining: number;
+}
 
 export interface Bucket {
     tokens: number;
@@ -17,6 +26,6 @@ export interface Bucket {
 
 export interface RateLimitResult {
   allowed: boolean;
-  tokensRemaining: number;
+  remaining: number;
   capacity: number;
 }

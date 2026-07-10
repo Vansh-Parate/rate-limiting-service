@@ -5,6 +5,7 @@ import { getBucket, saveBucket } from "./repositories/bucketRepository";
 import { getClient, saveClient } from "./repositories/clientRepository";
 import { checkRateLimit } from "./services/rateLimiterService";
 import crypto from "crypto"
+import { executeFixedWindow } from "./algorithms/fixedWindow";
 
 const app = express();
 
@@ -17,9 +18,9 @@ app.get('/', (req,res) => {
 app.post('/client', async(req,res) => {
     console.log(req.body);
 
-    const {clientId, capacity, refillRate,algorithm="token_bucket" } = req.body;
+    const {clientId, capacity, refillRate,algorithm="token_bucket" ,windowSize,maxRequests} = req.body;
 
-    if(!clientId || !capacity){
+    if(!clientId){
         return res.status(400).json({
             message: "Missing required fields"
         })
@@ -33,7 +34,9 @@ app.post('/client', async(req,res) => {
         capacity,
         apiKey,
         refillRate,
-        algorithm
+        algorithm,
+        windowSize,
+        maxRequests
     };
 
     await saveClient(client);
@@ -86,12 +89,31 @@ app.post("/check", async(req, res) => {
     )
     res.setHeader(
             "X-RateLimit-Remaining",
-            result.tokensRemaining
+            result.remaining
     )
     res.json({
             allowed: result.allowed,
-            tokensRemaining: result.tokensRemaining
+            tokensRemaining: result.remaining
     });
+});
+
+app.get("/test-fixed/:apiKey", async (req, res) => {
+
+    const config = await getClient(req.params.apiKey);
+
+    if (!config) {
+        return res.status(404).json({
+            message: "Client not found"
+        });
+    }
+
+    const result = await executeFixedWindow(
+        config.apiKey,
+        config.maxRequests!,
+        config.windowSize!
+    );
+
+    res.json(result);
 });
 
 const PORT = 3000;

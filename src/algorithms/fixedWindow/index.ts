@@ -2,20 +2,20 @@ import fs from "fs";
 import { redis } from "../../redis";
 
 const script = fs.readFileSync(
-    "./src/algorithms/tokenBucket/tokenBucket.lua",
+    "./src/algorithms/fixedWindow/fixedWindow.lua",
     "utf8"
 );
 
-export async function executeTokenBucket(
+export async function executeFixedWindow(
     apiKey: string,
-    capacity: number,
-    refillRate: number
+    maxRequests: number,
+    windowSize: number
 ) {
     const result = await redis.eval(script, {
-        keys: [`token_bucket:${apiKey}`],
+        keys: [`fixed-window:${apiKey}`],
         arguments: [
-            capacity.toString(),
-            refillRate.toString(),
+            maxRequests.toString(),
+            windowSize.toString(),
             Date.now().toString()
         ]
     });

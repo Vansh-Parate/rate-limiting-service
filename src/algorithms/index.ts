@@ -1,5 +1,6 @@
 import { executeTokenBucket } from "./tokenBucket";
 import { ClientConfig } from "../types";
+import { executeFixedWindow } from "./fixedWindow";
 
 export async function executeAlgorithm(config: ClientConfig){
     switch(config.algorithm){
@@ -9,6 +10,14 @@ export async function executeAlgorithm(config: ClientConfig){
                 config.capacity,
                 config.refillRate
             );
+
+        case "fixed_window":
+            return executeFixedWindow(
+                config.apiKey,
+                config.maxRequests!,
+                config.windowSize!
+            );
+            
         default:
             throw new Error(
                 `Unsupported algorithm: ${config.algorithm}`

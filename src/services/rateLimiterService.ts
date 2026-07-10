@@ -1,6 +1,5 @@
 import { getClient } from "../repositories/clientRepository";
-import { executeTokenBucket } from "../algorithms/tokenBucket";
-import { RateLimitResult } from "../types";
+import { RateLimitResult, ClientConfig } from "../types";
 import { executeAlgorithm } from "../algorithms";
 
 export async function checkRateLimit(
@@ -17,7 +16,20 @@ export async function checkRateLimit(
 
     return {
         allowed: result.allowed,
-        tokensRemaining: result.tokensRemaining,
-        capacity: config.capacity
+        remaining: result.remaining,
+        capacity: getLimit(config)
     };
+}
+
+function getLimit(config: ClientConfig): number {
+    switch (config.algorithm) {
+        case "token_bucket":
+            return config.capacity;
+
+        case "fixed_window":
+            return config.maxRequests!;
+
+        default:
+            throw new Error("Unsupported algorithm");
+    }
 }

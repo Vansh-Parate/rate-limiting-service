@@ -19,7 +19,7 @@ bucket.lastRefill = now
 if bucket.tokens < 1 then
     return cjson.encode({
         allowed = false,
-        tokensRemaining = bucket.tokens
+        remaining = bucket.tokens
     })
 end
 
@@ -33,5 +33,5 @@ redis.call(
 
 return cjson.encode({
     allowed = true,
-    tokensRemaining = bucket.tokens
+    remaining = bucket.tokens
 })
