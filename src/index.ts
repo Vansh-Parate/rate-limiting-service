@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { redis } from "./redis";
 import clientRoutes from "./routes/clientRoute"
