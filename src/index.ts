@@ -3,16 +3,19 @@ import express from "express";
 import { redis } from "./redis";
 import clientRoutes from "./routes/clientRoute"
 import ratelimitRoutes from "./routes/ratelimitRoute"
+import healthRoutes from "./routes/healthRoute"
 
 const app = express();
 
 app.use(express.json());
 app.use("/client",clientRoutes);
 app.use("/",ratelimitRoutes);
+app.use("/health",healthRoutes);
 
 app.get("/", (req, res) => {
     res.send("Rate limiter service running");
 });
+
 
 const PORT = 3000;
 

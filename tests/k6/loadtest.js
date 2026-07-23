@@ -12,15 +12,13 @@ const deniedCounter = new Counter("denied_requests");
 export default function () {
     const res = http.post(
         "http://localhost:3000/check",
-        JSON.stringify({
-            clientId: "load-test-4",
-        }),
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
+    null,
+    {
+        headers: {
+            "X-API-Key": "sk_your_api_key_here"
         }
-    );
+    }
+);
     const body = JSON.parse(res.body);
 
     if (body.allowed) {

@@ -1,8 +1,9 @@
 import fs from "fs";
 import { redis } from "../../redis";
+import path from "path";
 
 const script = fs.readFileSync(
-    "./src/algorithms/tokenBucket/tokenBucket.lua",
+    path.join(__dirname, "tokenBucket.lua"),
     "utf8"
 );
 
