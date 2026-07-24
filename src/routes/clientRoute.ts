@@ -1,13 +1,14 @@
 import express from "express";
 import crypto from "crypto";
-
 import { saveBucket } from "../repositories/bucketRepository";
 import { getClient, saveClient } from "../repositories/clientRepository";
 import { ClientConfig } from "../types";
+import {validate } from "../middleware/validate"
+import { clientSchema } from "../schemas/clientSchema";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+router.post("/",validate(clientSchema), async (req, res) => {
 
     const {
         clientId,
@@ -17,12 +18,6 @@ router.post("/", async (req, res) => {
         windowSize,
         maxRequests
     } = req.body;
-
-    if (!clientId) {
-        return res.status(400).json({
-            message: "Missing clientId"
-        });
-    }
 
     const apiKey =
         "sk_" + crypto.randomBytes(32).toString("hex");
@@ -39,9 +34,9 @@ router.post("/", async (req, res) => {
 
     await saveClient(client);
 
-    if (algorithm === "token_bucket") {
+    if (client.algorithm === "token_bucket") {
         await saveBucket(apiKey, {
-            tokens: capacity,
+            tokens: client.capacity,
             lastRefill: Date.now()
         });
     }
