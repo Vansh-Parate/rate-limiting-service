@@ -5,10 +5,11 @@ import { getClient, saveClient } from "../repositories/clientRepository";
 import { ClientConfig } from "../types";
 import {validate } from "../middleware/validate"
 import { clientSchema } from "../schemas/clientSchema";
+import { asyncHandler } from "../middleware/asyncHandler"
 
 const router = express.Router();
 
-router.post("/",validate(clientSchema), async (req, res) => {
+router.post("/",validate(clientSchema), asyncHandler(async (req, res) => {
 
     const {
         clientId,
@@ -42,7 +43,8 @@ router.post("/",validate(clientSchema), async (req, res) => {
     }
 
     res.status(201).json(client);
-});
+})
+);
 
 router.get("/:apiKey", async (req, res) => {
 
