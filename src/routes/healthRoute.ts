@@ -19,6 +19,7 @@ router.get("/", async (_, res) => {
             timestamp: new Date().toISOString()
         });
     }
+    logger.info("Health check");
 });
 
 export default router;

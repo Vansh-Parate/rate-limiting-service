@@ -43,6 +43,10 @@ router.post("/",validate(clientSchema), asyncHandler(async (req, res) => {
     }
 
     res.status(201).json(client);
+    logger.info({
+        clientId,
+        algorithm
+    }, "Client created");
 })
 );
 

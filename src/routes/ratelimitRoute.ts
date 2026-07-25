@@ -44,6 +44,12 @@ router.get("/bucket/:apiKey", async (req, res) => {
     }
 
     res.json(bucket);
+    logger.info({
+        apiKey,
+        algorithm: config.algorithm,
+        allowed: result.allowed,
+        remaining: result.remaining
+    }, "Rate limit checked");
 });
 
 export default router;
