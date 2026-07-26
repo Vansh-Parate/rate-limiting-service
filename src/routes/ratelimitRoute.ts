@@ -2,10 +2,30 @@ import express from "express";
 
 import { checkRateLimit } from "../services/rateLimiterService";
 import { getBucket } from "../repositories/bucketRepository";
+import { logger } from "../logger";
+import { asyncHandler } from "../middleware/asyncHandler"
 
 const router = express.Router();
 
-router.post("/check", async (req, res) => {
+/**
+ * @swagger
+ * /check:
+ *   post:
+ *     summary: Check whether a request is allowed
+ *     tags:
+ *       - Rate Limiter
+ *     parameters:
+ *       - in: header
+ *         name: X-API-Key
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Rate limit evaluated
+ */
+
+router.post("/check", asyncHandler(async (req, res) => {
 
     const apiKey = req.get("X-API-Key");
 
@@ -16,6 +36,12 @@ router.post("/check", async (req, res) => {
     }
 
     const result = await checkRateLimit(apiKey);
+
+    logger.info({
+        apiKey: apiKey.slice(0, 8) + "...",
+        allowed: result.allowed,
+        remaining: result.remaining
+    }, "Rate limit checked");
 
     res.setHeader(
         "X-RateLimit-Limit",
@@ -31,7 +57,8 @@ router.post("/check", async (req, res) => {
         allowed: result.allowed,
         remaining: result.remaining
     });
-});
+})
+);
 
 router.get("/bucket/:apiKey", async (req, res) => {
 
@@ -44,12 +71,6 @@ router.get("/bucket/:apiKey", async (req, res) => {
     }
 
     res.json(bucket);
-    logger.info({
-        apiKey,
-        algorithm: config.algorithm,
-        allowed: result.allowed,
-        remaining: result.remaining
-    }, "Rate limit checked");
 });
 
 export default router;

@@ -1,4 +1,5 @@
 import { createClient } from "redis";
+import { logger } from "./logger";
 
 console.log("REDIS_URL =", process.env.REDIS_URL);
 

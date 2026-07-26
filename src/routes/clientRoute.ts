@@ -6,8 +6,43 @@ import { ClientConfig } from "../types";
 import {validate } from "../middleware/validate"
 import { clientSchema } from "../schemas/clientSchema";
 import { asyncHandler } from "../middleware/asyncHandler"
+import { logger } from "../logger";
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /client:
+ *   post:
+ *     summary: Create a new API client
+ *     tags:
+ *       - Client
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               clientId:
+ *                 type: string
+ *               algorithm:
+ *                 type: string
+ *                 enum:
+ *                   - token_bucket
+ *                   - fixed_window
+ *               capacity:
+ *                 type: integer
+ *               refillRate:
+ *                 type: integer
+ *               windowSize:
+ *                 type: integer
+ *               maxRequests:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Client created successfully
+ */
 
 router.post("/",validate(clientSchema), asyncHandler(async (req, res) => {
 

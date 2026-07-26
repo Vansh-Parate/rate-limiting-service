@@ -1,7 +1,20 @@
 import express from "express";
 import { redis } from "../redis";
+import { logger } from "../logger";
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Check service health
+ *     tags:
+ *       - Health
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ */
 
 router.get("/", async (_, res) => {
     try {
