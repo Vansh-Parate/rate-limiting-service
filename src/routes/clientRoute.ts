@@ -33,12 +33,16 @@ const router = express.Router();
  *                   - fixed_window
  *               capacity:
  *                 type: integer
+ *                 example: 10
  *               refillRate:
  *                 type: integer
+ *                 example: 2
  *               windowSize:
  *                 type: integer
+ *                 example: 60
  *               maxRequests:
  *                 type: integer
+ *                 example: 100
  *     responses:
  *       201:
  *         description: Client created successfully
