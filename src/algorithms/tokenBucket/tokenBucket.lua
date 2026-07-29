@@ -1,10 +1,19 @@
-local bucket = cjson.decode(
-    redis.call("GET", KEYS[1])
-)
-
 local capacity = tonumber(ARGV[1])
 local refillRate = tonumber(ARGV[2])
 local now = tonumber(ARGV[3])
+
+local bucketData = redis.call("GET", KEYS[1])
+
+local bucket
+
+if not bucketData then
+    bucket = {
+        tokens = capacity,
+        lastRefill = now
+    }
+else
+    bucket = cjson.decode(bucketData)
+end
 
 local elapsed = (now - bucket.lastRefill) / 1000
 local refill = elapsed * refillRate

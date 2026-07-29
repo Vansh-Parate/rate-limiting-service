@@ -13,7 +13,7 @@ export async function executeTokenBucket(
     refillRate: number
 ) {
     const result = await redis.eval(script, {
-        keys: [`token_bucket:${apiKey}`],
+        keys: [`bucket:${apiKey}`],
         arguments: [
             capacity.toString(),
             refillRate.toString(),
