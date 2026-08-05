@@ -58,8 +58,9 @@ it("returns maxRequests for fixed window", async () => {
             clientId: "user2",
             apiKey: "sk_test",
             algorithm: "fixed_window",
-            windowSize: 60,
-            maxRequests: 100
+            maxRequests: 100,
+            refillRate: 0,
+            capacity: 0
         });
 
     vi.spyOn(algorithms, "executeAlgorithm")
